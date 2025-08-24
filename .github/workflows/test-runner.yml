@@ -1,0 +1,68 @@
+name: Test Self-Hosted Runner
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  test-on-self-hosted:
+    runs-on: self-hosted-linux  # Must match your runner's label
+    name: Test on Self-Hosted Runner
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v --cov=src
+
+    - name: Run calculator demo
+      run: |
+        python src/calculator.py
+
+    - name: Show system info
+      run: |
+        echo "Running on: $(uname -s)"
+        echo "CPU architecture: $(uname -m)"
+        echo "Python version: $(python --version)"
+        echo "Working directory: $(pwd)"
+        echo "Disk space:"
+        df -h
+        echo "Memory info:"
+        free -h
+
+  test-on-github-hosted:
+    runs-on: ubuntu-latest
+    name: Test on GitHub Hosted Runner (for comparison)
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ -v --cov=src
